@@ -1,0 +1,5 @@
+{
+  "installCommand": "pnpm install --no-frozen-lockfile",
+  "buildCommand": "pnpm --filter @outbound/backend build",
+  "outputDirectory": "backend/dist"
+}
