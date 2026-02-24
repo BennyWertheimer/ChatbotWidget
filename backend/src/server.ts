@@ -72,6 +72,10 @@ app.post("/chat", async (req, res) => {
 });
 
 const port = Number(process.env.PORT || 3001);
-app.listen(port, () => {
-  console.log(`[backend] listening on http://localhost:${port}`);
-});
+if (process.env.VERCEL !== "1") {
+  app.listen(port, () => {
+    console.log(`[backend] listening on http://localhost:${port}`);
+  });
+}
+
+export default app;

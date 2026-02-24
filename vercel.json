@@ -1,5 +1,5 @@
 {
   "installCommand": "pnpm install --no-frozen-lockfile",
-  "buildCommand": "pnpm --filter @outbound/shared build && pnpm --filter @outbound/backend build",
-  "outputDirectory": "backend/dist"
+  "buildCommand": "pnpm --filter @outbound/shared build && pnpm --filter @outbound/backend build && pnpm --filter @outbound/frontend build",
+  "outputDirectory": "frontend/dist"
 }

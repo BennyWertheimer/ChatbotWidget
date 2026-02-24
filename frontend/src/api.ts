@@ -1,9 +1,10 @@
 import type { ChatMessage, ChatResponse } from "@outbound/shared";
 
-const BACKEND_URL = "http://localhost:3001";
+const BASE = import.meta.env.VITE_BACKEND_URL ?? "http://localhost:3001";
+const API_PREFIX = BASE ? "" : "/api";
 
 export async function sendChat(messages: ChatMessage[]): Promise<ChatResponse> {
-  const res = await fetch(`${BACKEND_URL}/chat`, {
+  const res = await fetch(`${BASE}${API_PREFIX}/chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ messages })
@@ -18,7 +19,7 @@ export async function sendChat(messages: ChatMessage[]): Promise<ChatResponse> {
 }
 
 export async function submitLead(email: string, phone: string): Promise<void> {
-  const res = await fetch(`${BACKEND_URL}/lead`, {
+  const res = await fetch(`${BASE}${API_PREFIX}/lead`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email: email.trim(), phone: phone.trim() })
