@@ -5,6 +5,7 @@ import { sendChat, submitLead } from "./api";
 export function ChatWidget() {
   const [open, setOpen] = useState(false);
   const [started, setStarted] = useState(false);
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [leadError, setLeadError] = useState<string | null>(null);
@@ -13,7 +14,7 @@ export function ChatWidget() {
   const [isTyping, setIsTyping] = useState(false);
 
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: "assistant", content: "Hey, welcome to SealX? How can I help you?" }
+    { role: "assistant", content: "Hey, welcome to SealX. How can I help you?" }
   ]);
 
   const listRef = useRef<HTMLDivElement | null>(null);
@@ -113,8 +114,21 @@ export function ChatWidget() {
               }}
             >
               <p style={{ margin: 0, fontSize: 14, color: "rgba(0,0,0,0.7)", textAlign: "center" }}>
-                Enter your email and phone number to chat with our customer assistant.
+                Enter your name, email, and phone number to chat with our customer assistant.
               </p>
+              <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Name"
+                type="text"
+                style={{
+                  padding: "10px 12px",
+                  borderRadius: 10,
+                  border: "1px solid rgba(0,0,0,0.15)",
+                  outline: "none",
+                  fontSize: 14
+                }}
+              />
               <input
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -146,11 +160,11 @@ export function ChatWidget() {
               )}
               <button
                 onClick={async () => {
-                  if (!email.trim() || !phone.trim() || leadLoading) return;
+                  if (!name.trim() || !email.trim() || !phone.trim() || leadLoading) return;
                   setLeadError(null);
                   setLeadLoading(true);
                   try {
-                    await submitLead(email, phone);
+                    await submitLead(name, email, phone);
                     setStarted(true);
                   } catch (e: any) {
                     setLeadError(e?.message ?? "Couldn’t save — try again.");
@@ -158,13 +172,13 @@ export function ChatWidget() {
                     setLeadLoading(false);
                   }
                 }}
-                disabled={!email.trim() || !phone.trim() || leadLoading}
+                disabled={!name.trim() || !email.trim() || !phone.trim() || leadLoading}
                 style={{
                   padding: "12px",
                   borderRadius: 10,
                   border: "none",
-                  cursor: email.trim() && phone.trim() && !leadLoading ? "pointer" : "not-allowed",
-                  background: email.trim() && phone.trim() && !leadLoading ? "#111" : "rgba(0,0,0,0.2)",
+                  cursor: name.trim() && email.trim() && phone.trim() && !leadLoading ? "pointer" : "not-allowed",
+                  background: name.trim() && email.trim() && phone.trim() && !leadLoading ? "#111" : "rgba(0,0,0,0.2)",
                   color: "white",
                   fontWeight: 600,
                   marginTop: 4

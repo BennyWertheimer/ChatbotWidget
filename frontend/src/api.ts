@@ -18,11 +18,11 @@ export async function sendChat(messages: ChatMessage[]): Promise<ChatResponse> {
   return res.json() as Promise<ChatResponse>;
 }
 
-export async function submitLead(email: string, phone: string): Promise<void> {
+export async function submitLead(name: string, email: string, phone: string): Promise<void> {
   const res = await fetch(`${BASE}${API_PREFIX}/lead`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: email.trim(), phone: phone.trim() })
+    body: JSON.stringify({ name: name.trim(), email: email.trim(), phone: phone.trim() })
   });
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));

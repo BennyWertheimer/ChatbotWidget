@@ -19,6 +19,7 @@ const ChatRequestSchema = z.object({
 });
 
 const LeadSchema = z.object({
+  name: z.string().min(1, "Name is required"),
   email: z.string().min(1, "Email is required"),
   phone: z.string().min(1, "Phone is required")
 });
@@ -32,7 +33,7 @@ app.post("/lead", async (req, res) => {
     const parsed = LeadSchema.parse(req.body);
     const { error } = await supabase
       .from("chatbot_leads")
-      .insert({ Email: parsed.email.trim(), Phone: parsed.phone.trim() });
+      .insert({ Name: parsed.name.trim(), Email: parsed.email.trim(), Phone: parsed.phone.trim() });
     if (error) {
       console.error("Supabase insert error:", error);
       return res.status(500).json({ error: error.message });
