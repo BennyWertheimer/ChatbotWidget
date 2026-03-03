@@ -3,7 +3,8 @@ import express from "express";
 import cors from "cors";
 import { z } from "zod";
 import { openai } from "./openai.js";
-import { SYSTEM_PROMPT } from "./prompt.js";
+import { buildSystemPrompt, NO_CHUNKS_REPLY } from "./prompt.js";
+import { retrieveChunks, buildContextFromChunks } from "./retrieve.js";
 import { supabase } from "./supabase.js";
 import type { ChatRequest, ChatResponse } from "@outbound/shared";
 
@@ -18,10 +19,31 @@ const ChatRequestSchema = z.object({
   })).min(1)
 });
 
+function validateEmail(email: string): boolean {
+  const s = email.trim();
+  const at = s.indexOf("@");
+  return at > 0 && at < s.length - 1 && s.length >= 3;
+}
+
+function validatePhone(phone: string): { valid: boolean; digits: string } {
+  const digits = phone.replace(/\s|\(|\)|-|\./g, "");
+  return { valid: /^\d{10}$/.test(digits), digits };
+}
+
 const LeadSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  email: z.string().min(1, "Email is required"),
-  phone: z.string().min(1, "Phone is required")
+  email: z.string().min(1, "Email is required").refine(validateEmail, "Please enter a valid email (e.g. you@example.com)"),
+  phone: z.string().min(1, "Phone is required").transform((s) => {
+    const { valid, digits } = validatePhone(s);
+    if (!valid) throw new Error("Phone must be exactly 10 digits (spaces, dashes, parentheses are ok)");
+    return digits;
+  }),
+  transcript_id: z.string().optional(),
+  last_question: z.string().optional(),
+  referrer: z.string().optional(),
+  utm_source: z.string().optional(),
+  utm_medium: z.string().optional(),
+  utm_campaign: z.string().optional(),
 });
 
 app.get("/health", (_req, res) => {
@@ -31,9 +53,18 @@ app.get("/health", (_req, res) => {
 app.post("/lead", async (req, res) => {
   try {
     const parsed = LeadSchema.parse(req.body);
-    const { error } = await supabase
-      .from("chatbot_leads")
-      .insert({ Name: parsed.name.trim(), Email: parsed.email.trim(), Phone: parsed.phone.trim() });
+    const row: Record<string, unknown> = {
+      Name: parsed.name.trim(),
+      Email: parsed.email.trim(),
+      Phone: parsed.phone,
+    };
+    if (parsed.transcript_id != null) row.transcript_id = parsed.transcript_id;
+    if (parsed.last_question != null) row.last_question = parsed.last_question;
+    if (parsed.referrer != null) row.referrer = parsed.referrer;
+    if (parsed.utm_source != null) row.utm_source = parsed.utm_source;
+    if (parsed.utm_medium != null) row.utm_medium = parsed.utm_medium;
+    if (parsed.utm_campaign != null) row.utm_campaign = parsed.utm_campaign;
+    const { error } = await supabase.from("chatbot_leads").insert(row);
     if (error) {
       console.error("Supabase insert error:", error);
       return res.status(500).json({ error: error.message });
@@ -48,24 +79,31 @@ app.post("/lead", async (req, res) => {
 app.post("/chat", async (req, res) => {
   try {
     const parsed = ChatRequestSchema.parse(req.body) as ChatRequest;
+    const lastUserMessage = [...parsed.messages].reverse().find((m) => m.role === "user")?.content?.trim();
+    if (!lastUserMessage) {
+      return res.status(400).json({ error: "No user message" });
+    }
+
+    const chunks = await retrieveChunks(lastUserMessage);
+    if (chunks.length === 0) {
+      return res.json({ reply: NO_CHUNKS_REPLY });
+    }
+
+    const context = buildContextFromChunks(chunks);
+    const systemContent = buildSystemPrompt(context);
 
     const messages = [
-      {
-        role: "system" as const,
-        content: SYSTEM_PROMPT
-      },
-      ...parsed.messages
+      { role: "system" as const, content: systemContent },
+      ...parsed.messages,
     ];
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
-      messages
+      messages,
     });
 
-    const reply = completion.choices[0]?.message?.content?.trim() || "Sorry — I couldn’t generate a response.";
-
-    const body: ChatResponse = { reply };
-    res.json(body);
+    const reply = completion.choices[0]?.message?.content?.trim() || NO_CHUNKS_REPLY;
+    res.json({ reply } as ChatResponse);
   } catch (err: any) {
     console.error(err);
     res.status(400).json({ error: err?.message ?? "Bad request" });

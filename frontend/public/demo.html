@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SealX Chat Widget — Demo</title>
+    <style>
+      body { font-family: system-ui, sans-serif; max-width: 640px; margin: 2rem auto; padding: 0 1rem; }
+      h1 { font-size: 1.25rem; }
+      code { background: #f0f0f0; padding: 2px 6px; border-radius: 4px; }
+      .snippet { background: #f8f8f8; padding: 12px; border-radius: 8px; overflow-x: auto; font-size: 14px; }
+    </style>
+  </head>
+  <body>
+    <h1>SealX Chat Widget — Demo</h1>
+    <p>This page tests the widget embed. Use either method below.</p>
+
+    <h2>Option 1: Script tag (injects iframe)</h2>
+    <p>Add this to your page (replace the API URL with your backend):</p>
+    <pre class="snippet"><code>&lt;script src="https://YOUR-HOST/widget.js" data-api-url="https://YOUR-API" data-workspace="SealX" data-theme-color="#111"&gt;&lt;/script&gt;</code></pre>
+    <p>For local demo, the widget will load below using the script tag.</p>
+
+    <h2>Option 2: Iframe</h2>
+    <pre class="snippet"><code>&lt;iframe src="https://YOUR-HOST/embed.html?apiBaseUrl=https://YOUR-API" title="SealX Chat" width="400" height="600" style="border:none;"&gt;&lt;/iframe&gt;</code></pre>
+
+    <p style="margin-top: 2rem;">Widget loads below (script tag):</p>
+    <script>
+      (function () {
+        var script = document.createElement("script");
+        script.src = "/widget.js";
+        script.setAttribute("data-api-url", window.location.origin.replace("5173", "3001") || "http://localhost:3001");
+        script.setAttribute("data-workspace", "SealX");
+        document.body.appendChild(script);
+      })();
+    </script>
+  </body>
+</html>

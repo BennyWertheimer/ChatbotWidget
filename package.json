@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "pnpm -r --parallel dev",
     "build": "pnpm -r build",
-    "lint": "pnpm -r lint"
+    "lint": "pnpm -r lint",
+    "ingest:sealx": "pnpm --filter @outbound/backend run ingest:sealx",
+    "test:sealx": "pnpm --filter @outbound/backend run test:sealx"
   }
 }

@@ -1,0 +1,21 @@
+(function () {
+  var s = document.currentScript;
+  if (!s || !s.src) return;
+  var base = s.src.replace(/\/[^/]*$/, "");
+  var apiUrl = s.getAttribute("data-api-url") || s.getAttribute("data-api") || "";
+  var workspace = s.getAttribute("data-workspace") || "SealX";
+  var themeColor = s.getAttribute("data-theme-color") || s.getAttribute("data-primary-color") || "";
+  var launcherText = s.getAttribute("data-launcher-text") || "";
+  var greetingText = s.getAttribute("data-greeting-text") || "";
+  var avatarUrl = s.getAttribute("data-avatar-url") || "";
+  var embedUrl = base + "/embed.html?apiBaseUrl=" + encodeURIComponent(apiUrl) + "&workspace=" + encodeURIComponent(workspace);
+  if (themeColor) embedUrl += "&themeColor=" + encodeURIComponent(themeColor);
+  if (launcherText) embedUrl += "&launcherText=" + encodeURIComponent(launcherText);
+  if (greetingText) embedUrl += "&greetingText=" + encodeURIComponent(greetingText);
+  if (avatarUrl) embedUrl += "&avatarUrl=" + encodeURIComponent(avatarUrl);
+  var iframe = document.createElement("iframe");
+  iframe.src = embedUrl;
+  iframe.title = "SealX Chat";
+  iframe.style.cssText = "position:fixed;bottom:0;right:0;width:100%;max-width:400px;height:100%;max-height:600px;border:none;z-index:9999;box-shadow:-4px 0 20px rgba(0,0,0,0.15)";
+  document.body.appendChild(iframe);
+})();

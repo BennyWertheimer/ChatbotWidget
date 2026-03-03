@@ -9,3 +9,27 @@ body {
 button {
   font-family: inherit;
 }
+
+/* Greeting bubble tail (pointer toward launcher) */
+.sealx-greeting-tail {
+  position: absolute;
+  bottom: -8px;
+  right: 24px;
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 10px solid white;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.06));
+}
+
+/* Launcher button hover: slight darken + lift */
+.sealx-launcher-button:hover {
+  filter: brightness(0.92);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  transform: translateY(-1px);
+}
+
+.sealx-launcher-button:active {
+  transform: translateY(0);
+}
