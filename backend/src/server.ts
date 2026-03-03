@@ -97,16 +97,24 @@ app.post("/chat", async (req, res) => {
       ...parsed.messages,
     ];
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages,
-    });
+    let reply: string;
+    try {
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages,
+      });
+      reply = completion.choices[0]?.message?.content?.trim() || NO_CHUNKS_REPLY;
+    } catch (llmErr: any) {
+      console.error("[chat] LLM error:", llmErr?.message ?? llmErr);
+      reply = "I'm having a small hiccup right now. Please try again in a moment, or I can connect you with the team—just ask.";
+    }
 
-    const reply = completion.choices[0]?.message?.content?.trim() || NO_CHUNKS_REPLY;
     res.json({ reply } as ChatResponse);
   } catch (err: any) {
-    console.error(err);
-    res.status(400).json({ error: err?.message ?? "Bad request" });
+    console.error("[chat] error:", err?.message ?? err);
+    res.status(200).json({
+      reply: "I can only help with SealX questions right now. Want me to connect you with the team?",
+    } as ChatResponse);
   }
 });
 

@@ -17,27 +17,32 @@ export type RetrievedChunk = {
 };
 
 export async function retrieveChunks(userMessage: string): Promise<RetrievedChunk[]> {
-  const res = await openai.embeddings.create({
-    model: EMBEDDING_MODEL,
-    input: userMessage.trim().slice(0, 8000),
-  });
-  const embedding = res.data?.[0]?.embedding;
-  if (!embedding || embedding.length !== 1536) {
+  try {
+    const res = await openai.embeddings.create({
+      model: EMBEDDING_MODEL,
+      input: userMessage.trim().slice(0, 8000),
+    });
+    const embedding = res.data?.[0]?.embedding;
+    if (!embedding || embedding.length !== 1536) {
+      return [];
+    }
+
+    const { data, error } = await supabase.rpc("match_sealx_chunks", {
+      query_embedding: embedding,
+      match_count: TOP_K,
+    });
+
+    if (error) {
+      console.error("[retrieve] match_sealx_chunks error:", error.message);
+      return [];
+    }
+
+    const rows = (data ?? []) as RetrievedChunk[];
+    return rows.filter((r) => r?.source_url && (r.source_url.startsWith("https://sealx.com") || r.source_url.startsWith("http://sealx.com")));
+  } catch (e) {
+    console.error("[retrieve] error (embeddings or RPC):", (e as Error).message);
     return [];
   }
-
-  const { data, error } = await supabase.rpc("match_sealx_chunks", {
-    query_embedding: embedding,
-    match_count: TOP_K,
-  });
-
-  if (error) {
-    console.error("match_sealx_chunks error:", error);
-    return [];
-  }
-
-  const rows = (data ?? []) as RetrievedChunk[];
-  return rows.filter((r) => r?.source_url && (r.source_url.startsWith("https://sealx.com") || r.source_url.startsWith("http://sealx.com")));
 }
 
 export function buildContextFromChunks(chunks: RetrievedChunk[]): string {
