@@ -77,16 +77,24 @@ app.post("/lead", async (req, res) => {
 });
 
 app.post("/chat", async (req, res) => {
+  const safeReply = (reply: string) => {
+    try {
+      res.status(200).json({ reply });
+    } catch (e) {
+      console.error("[chat] response send error:", (e as Error).message);
+    }
+  };
+
   try {
     const parsed = ChatRequestSchema.parse(req.body) as ChatRequest;
     const lastUserMessage = [...parsed.messages].reverse().find((m) => m.role === "user")?.content?.trim();
     if (!lastUserMessage) {
-      return res.status(400).json({ error: "No user message" });
+      return safeReply(NO_CHUNKS_REPLY);
     }
 
     const chunks = await retrieveChunks(lastUserMessage);
     if (chunks.length === 0) {
-      return res.json({ reply: NO_CHUNKS_REPLY });
+      return safeReply(NO_CHUNKS_REPLY);
     }
 
     const context = buildContextFromChunks(chunks);
@@ -97,24 +105,20 @@ app.post("/chat", async (req, res) => {
       ...parsed.messages,
     ];
 
-    let reply: string;
     try {
       const completion = await openai.chat.completions.create({
         model: "gpt-4o-mini",
         messages,
       });
-      reply = completion.choices[0]?.message?.content?.trim() || NO_CHUNKS_REPLY;
+      const reply = completion.choices[0]?.message?.content?.trim() || NO_CHUNKS_REPLY;
+      return safeReply(reply);
     } catch (llmErr: any) {
       console.error("[chat] LLM error:", llmErr?.message ?? llmErr);
-      reply = "I'm having a small hiccup right now. Please try again in a moment, or I can connect you with the team—just ask.";
+      return safeReply("I'm having a small hiccup right now. Please try again in a moment, or I can connect you with the team—just ask.");
     }
-
-    res.json({ reply } as ChatResponse);
   } catch (err: any) {
     console.error("[chat] error:", err?.message ?? err);
-    res.status(200).json({
-      reply: "I can only help with SealX questions right now. Want me to connect you with the team?",
-    } as ChatResponse);
+    return safeReply("I can only help with SealX questions right now. Want me to connect you with the team?");
   }
 });
 

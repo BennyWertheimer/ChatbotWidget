@@ -12,6 +12,10 @@ function getBase(): string {
     const params = new URLSearchParams(window.location.search);
     const fromUrl = params.get("apiBaseUrl") ?? params.get("api");
     if (fromUrl) return fromUrl;
+    // Deployed on same host (e.g. Vercel): use /api so chat and lead work without env
+    if (window.location.origin && !window.location.hostname.includes("localhost")) {
+      return window.location.origin + "/api";
+    }
   }
   return import.meta.env.VITE_BACKEND_URL ?? "http://localhost:3001";
 }

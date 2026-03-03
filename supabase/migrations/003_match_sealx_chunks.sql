@@ -20,7 +20,7 @@ BEGIN
     c.source_url,
     c.title,
     c.headings
-  FROM sealx_chunks c
+  FROM public.sealx_chunks c
   ORDER BY c.embedding <=> query_embedding
   LIMIT match_count;
 END;

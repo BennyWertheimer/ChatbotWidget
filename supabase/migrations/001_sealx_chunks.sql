@@ -1,8 +1,15 @@
--- Enable pgvector extension (run in Supabase SQL Editor if not already enabled)
+-- Additive-only migration:
+-- - Enables required extensions if missing
+-- - Creates NEW table public.sealx_chunks only (does not touch existing app tables)
+
+-- Required for vector type / indexes (Supabase typically has this available)
 CREATE EXTENSION IF NOT EXISTS vector;
 
+-- Required for gen_random_uuid() default (Supabase typically has this enabled)
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 -- SealX RAG chunks: only populated from sealx.com crawl
-CREATE TABLE IF NOT EXISTS sealx_chunks (
+CREATE TABLE IF NOT EXISTS public.sealx_chunks (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   content text NOT NULL,
   embedding vector(1536) NOT NULL,
@@ -17,10 +24,10 @@ CREATE TABLE IF NOT EXISTS sealx_chunks (
 );
 
 -- Index for similarity search (cosine distance). HNSW works on empty table.
-CREATE INDEX IF NOT EXISTS sealx_chunks_embedding_idx ON sealx_chunks
+CREATE INDEX IF NOT EXISTS sealx_chunks_embedding_idx ON public.sealx_chunks
   USING hnsw (embedding vector_cosine_ops);
 
 -- Optional: index for filtering by source_url
-CREATE INDEX IF NOT EXISTS sealx_chunks_source_url_idx ON sealx_chunks (source_url);
+CREATE INDEX IF NOT EXISTS sealx_chunks_source_url_idx ON public.sealx_chunks (source_url);
 
-COMMENT ON TABLE sealx_chunks IS 'RAG chunks from sealx.com only; domain lock enforced by CHECK constraint';
+COMMENT ON TABLE public.sealx_chunks IS 'RAG chunks from sealx.com only; domain lock enforced by CHECK constraint';
