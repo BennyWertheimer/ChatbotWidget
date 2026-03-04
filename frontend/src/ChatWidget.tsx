@@ -112,12 +112,12 @@ export function ChatWidget(props?: { launcherConfig?: WidgetLauncherConfig | nul
 
   async function doSubmitLead(isHandoff: boolean) {
     if (!validateEmail(email)) {
-      setLeadError("Please enter a valid email (e.g. you@example.com).");
+      setLeadError("Please use a valid email format.");
       return;
     }
     const phoneCheck = validatePhone(phone);
     if (!phoneCheck.valid) {
-      setLeadError("Phone must be exactly 10 digits (spaces and dashes are ok).");
+      setLeadError("Please use a valid 10-digit phone number.");
       return;
     }
     setLeadError(null);
@@ -271,9 +271,6 @@ export function ChatWidget(props?: { launcherConfig?: WidgetLauncherConfig | nul
                 justifyContent: "center"
               }}
             >
-              <p style={{ margin: 0, fontSize: 14, color: "rgba(0,0,0,0.7)", textAlign: "center" }}>
-                Enter your name, email, and phone number to chat. We need a valid email (with @) and a 10-digit phone number.
-              </p>
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -317,12 +314,25 @@ export function ChatWidget(props?: { launcherConfig?: WidgetLauncherConfig | nul
                 By entering this information you are consenting for us to reach out to you.
               </p>
               {leadError && (
-                <p style={{ margin: 0, fontSize: 13, color: "#c00" }}>{leadError}</p>
+                <div style={{ margin: 0, fontSize: 13, color: "#c00" }}>
+                  <p style={{ margin: 0 }}>{leadError}</p>
+                  <p style={{ margin: "4px 0 0", fontSize: 12, opacity: 0.9 }}>
+                    {leadError.includes("email") ? "Example: name@example.com" : leadError.includes("phone") ? "Example: (555) 123-4567" : null}
+                  </p>
+                </div>
               )}
               <button
                 onClick={async () => {
-                  if (!name.trim() || !validateEmail(email) || !validatePhone(phone).valid || leadLoading) return;
+                  if (!name.trim() || !email.trim() || !phone.trim() || leadLoading) return;
                   setLeadError(null);
+                  if (!validateEmail(email)) {
+                    setLeadError("Please use the correct format for email.");
+                    return;
+                  }
+                  if (!validatePhone(phone).valid) {
+                    setLeadError("Please use the correct format for phone number.");
+                    return;
+                  }
                   setLeadLoading(true);
                   try {
                     await doSubmitLead(false);
@@ -333,13 +343,13 @@ export function ChatWidget(props?: { launcherConfig?: WidgetLauncherConfig | nul
                     setLeadLoading(false);
                   }
                 }}
-                disabled={!name.trim() || !validateEmail(email) || !validatePhone(phone).valid || leadLoading}
+                disabled={!name.trim() || !email.trim() || !phone.trim() || leadLoading}
                 style={{
                   padding: "12px",
                   borderRadius: 10,
                   border: "none",
-                  cursor: name.trim() && validateEmail(email) && validatePhone(phone).valid && !leadLoading ? "pointer" : "not-allowed",
-                  background: name.trim() && validateEmail(email) && validatePhone(phone).valid && !leadLoading ? "#111" : "rgba(0,0,0,0.2)",
+                  cursor: name.trim() && email.trim() && phone.trim() && !leadLoading ? "pointer" : "not-allowed",
+                  background: name.trim() && email.trim() && phone.trim() && !leadLoading ? "#111" : "rgba(0,0,0,0.2)",
                   color: "white",
                   fontWeight: 600,
                   marginTop: 4
