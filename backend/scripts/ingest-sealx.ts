@@ -1,7 +1,13 @@
 /**
- * SealX ingestion: crawl https://sealx.com only, chunk, embed, store in sealx_chunks.
- * Domain lock: only sealx.com. Respects robots.txt. Sitemap-first, else BFS.
- * Run: pnpm run ingest:sealx (from repo root) or pnpm --filter @outbound/backend run ingest:sealx
+ * SealX ingestion: crawl sealx.com only, chunk, embed, store in sealx_chunks.
+ * Crawls ALL same-origin pages (sitemap or BFS from homepage), not just the homepage.
+ * Domain lock: only sealx.com / www.sealx.com. Respects robots.txt.
+ * Run: pnpm run ingest:sealx (from repo root)
+ *
+ * Env: SEALX_BASE_URL overrides start URL (e.g. https://www.sealx.com if sealx.com has SSL issues).
+ * If you get "fetch failed" due to SSL cert mismatch, try:
+ *   SEALX_BASE_URL=https://www.sealx.com pnpm run ingest:sealx
+ * or (insecure) NODE_TLS_REJECT_UNAUTHORIZED=0 pnpm run ingest:sealx
  */
 import "dotenv/config";
 import { load } from "cheerio";
@@ -9,7 +15,7 @@ import robotsParser from "robots-parser";
 import { createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
 
-const BASE_URL = "https://sealx.com";
+const BASE_URL = process.env.SEALX_BASE_URL || "https://sealx.com";
 const ALLOWED_ORIGIN = new URL(BASE_URL).origin;
 const CHUNK_SIZE = 600;
 const CHUNK_OVERLAP = 100;

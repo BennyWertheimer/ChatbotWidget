@@ -64,7 +64,15 @@ From repo root (with backend env and Supabase configured):
 pnpm run ingest:sealx
 ```
 
-This crawls **only** https://sealx.com, chunks and embeds content, and stores it in `sealx_chunks`. Re-run to refresh.
+This crawls **all** SealX pages (sitemap if present, otherwise BFS from the homepage following same-origin links), not just the homepage. It only ingests from sealx.com / www.sealx.com, then chunks and embeds content into `sealx_chunks`. Re-run to refresh.
+
+If you see "fetch failed" due to SSL (e.g. certificate doesn’t match sealx.com), try the host that has a valid cert, e.g. `www.sealx.com`:
+
+```bash
+SEALX_BASE_URL=https://www.sealx.com pnpm run ingest:sealx
+```
+
+Or temporarily allow insecure TLS (not for production): `NODE_TLS_REJECT_UNAUTHORIZED=0 pnpm run ingest:sealx`
 
 ### One-line embed (for SealX site)
 

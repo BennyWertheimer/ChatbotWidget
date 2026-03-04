@@ -37,8 +37,11 @@ export async function retrieveChunks(userMessage: string): Promise<RetrievedChun
       return [];
     }
 
-    const rows = (data ?? []) as RetrievedChunk[];
-    return rows.filter((r) => r?.source_url && (r.source_url.startsWith("https://sealx.com") || r.source_url.startsWith("http://sealx.com")));
+  const rows = (data ?? []) as RetrievedChunk[];
+  return rows.filter((r) => r?.source_url && (
+    r.source_url.startsWith("https://sealx.com") || r.source_url.startsWith("http://sealx.com") ||
+    r.source_url.startsWith("https://www.sealx.com") || r.source_url.startsWith("http://www.sealx.com")
+  ));
   } catch (e) {
     console.error("[retrieve] error (embeddings or RPC):", (e as Error).message);
     return [];
