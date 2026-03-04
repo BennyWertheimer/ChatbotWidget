@@ -272,7 +272,7 @@ export function ChatWidget(props?: { launcherConfig?: WidgetLauncherConfig | nul
               }}
             >
               <p style={{ margin: 0, fontSize: 14, color: "rgba(0,0,0,0.7)", textAlign: "center" }}>
-                Enter your name, email, and phone number to chat with our customer assistant.
+                Enter your name, email, and phone number to chat. We need a valid email (with @) and a 10-digit phone number.
               </p>
               <input
                 value={name}
@@ -314,14 +314,14 @@ export function ChatWidget(props?: { launcherConfig?: WidgetLauncherConfig | nul
                 }}
               />
               <p style={{ margin: 0, fontSize: 12, color: "rgba(0,0,0,0.6)" }}>
-                Ok if we have the team reach out?
+                By entering this information you are consenting for us to reach out to you.
               </p>
               {leadError && (
                 <p style={{ margin: 0, fontSize: 13, color: "#c00" }}>{leadError}</p>
               )}
               <button
                 onClick={async () => {
-                  if (!name.trim() || !email.trim() || !phone.trim() || leadLoading) return;
+                  if (!name.trim() || !validateEmail(email) || !validatePhone(phone).valid || leadLoading) return;
                   setLeadError(null);
                   setLeadLoading(true);
                   try {
@@ -333,13 +333,13 @@ export function ChatWidget(props?: { launcherConfig?: WidgetLauncherConfig | nul
                     setLeadLoading(false);
                   }
                 }}
-                disabled={!name.trim() || !email.trim() || !phone.trim() || leadLoading}
+                disabled={!name.trim() || !validateEmail(email) || !validatePhone(phone).valid || leadLoading}
                 style={{
                   padding: "12px",
                   borderRadius: 10,
                   border: "none",
-                  cursor: name.trim() && email.trim() && phone.trim() && !leadLoading ? "pointer" : "not-allowed",
-                  background: name.trim() && email.trim() && phone.trim() && !leadLoading ? "#111" : "rgba(0,0,0,0.2)",
+                  cursor: name.trim() && validateEmail(email) && validatePhone(phone).valid && !leadLoading ? "pointer" : "not-allowed",
+                  background: name.trim() && validateEmail(email) && validatePhone(phone).valid && !leadLoading ? "#111" : "rgba(0,0,0,0.2)",
                   color: "white",
                   fontWeight: 600,
                   marginTop: 4
@@ -398,7 +398,7 @@ export function ChatWidget(props?: { launcherConfig?: WidgetLauncherConfig | nul
                 )}
                 {showHandoffForm && (
                   <div style={{ marginTop: 12, padding: 12, background: "rgba(0,0,0,0.04)", borderRadius: 10 }}>
-                    <p style={{ margin: "0 0 8px", fontSize: 13 }}>Ok if we have the team reach out?</p>
+                    <p style={{ margin: "0 0 8px", fontSize: 13 }}>By entering this information you are consenting for us to reach out to you.</p>
                     <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" style={{ width: "100%", marginBottom: 6, padding: "8px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.15)" }} />
                     <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" type="email" style={{ width: "100%", marginBottom: 6, padding: "8px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.15)" }} />
                     <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone (10 digits)" type="tel" style={{ width: "100%", marginBottom: 8, padding: "8px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.15)" }} />
