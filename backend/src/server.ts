@@ -91,6 +91,10 @@ app.post("/chat", async (req, res) => {
     if (!lastUserMessage) {
       return safeReply(NO_CHUNKS_REPLY);
     }
+    const handoffIntent = /\b(yes please|connect me|please connect|free consultation|consultation|reach out|contact me)\b/i.test(lastUserMessage);
+    if (handoffIntent) {
+      return safeReply("Thanks! We will be in touch ASAP. Want me to connect you with the team?");
+    }
 
     const chunks = await retrieveChunks(lastUserMessage);
     if (chunks.length === 0) {
