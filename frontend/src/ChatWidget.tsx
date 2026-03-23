@@ -131,8 +131,17 @@ export function ChatWidget(props?: { launcherConfig?: WidgetLauncherConfig | nul
         last_question: isHandoff ? lastUserMessage : undefined,
         ...getUtmAndReferrer(),
       });
-      if (isHandoff) setShowHandoffForm(false);
-      else setStarted(true);
+      if (isHandoff) {
+        setShowHandoffForm(false);
+        setHandoffOffered(false);
+        setHandoffDeclined(true);
+        setMessages((prev) => [
+          ...prev,
+          { role: "assistant", content: "Thanks! We'll be in touch ASAP." },
+        ]);
+      } else {
+        setStarted(true);
+      }
     } catch (e: any) {
       setLeadError(e?.message ?? "Could not save. Try again.");
     } finally {
@@ -338,7 +347,7 @@ export function ChatWidget(props?: { launcherConfig?: WidgetLauncherConfig | nul
                     await doSubmitLead(false);
                     setStarted(true);
                   } catch (e: any) {
-                    setLeadError(e?.message ?? "Couldn’t save — try again.");
+                    setLeadError(e?.message ?? "Could not save. Try again.");
                   } finally {
                     setLeadLoading(false);
                   }
