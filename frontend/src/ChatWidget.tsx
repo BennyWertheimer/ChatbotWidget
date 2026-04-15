@@ -10,7 +10,7 @@ export type WidgetLauncherConfig = {
 };
 
 const DEFAULT_LAUNCHER_CONFIG: Required<WidgetLauncherConfig> = {
-  primaryColor: "#a85c41",
+  primaryColor: "#FC221C",
   launcherText: "Text us",
   greetingText: "Hi there, have a question? Text us here.",
   avatarUrl: "/assistant-avatar.png",
