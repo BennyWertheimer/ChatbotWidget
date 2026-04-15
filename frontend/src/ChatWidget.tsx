@@ -13,7 +13,19 @@ const DEFAULT_LAUNCHER_CONFIG: Required<WidgetLauncherConfig> = {
   primaryColor: "#a85c41",
   launcherText: "Text us",
   greetingText: "Hi there, have a question? Text us here.",
-  avatarUrl: "https://ui-avatars.com/api/?name=Chat&size=80&background=e8e4e0&color=6b5b52",
+  avatarUrl: `data:image/svg+xml;utf8,${encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80">
+      <defs>
+        <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+          <stop offset="0%" stop-color="#f2ddd2"/>
+          <stop offset="100%" stop-color="#d6b9a7"/>
+        </linearGradient>
+      </defs>
+      <rect width="80" height="80" rx="40" fill="url(#g)"/>
+      <circle cx="40" cy="30" r="13" fill="#f7efe9"/>
+      <path d="M16 68c2-12 11-20 24-20s22 8 24 20" fill="#f7efe9"/>
+    </svg>`
+  )}`,
 };
 
 function ChatIcon() {
@@ -52,7 +64,7 @@ export function ChatWidget(props?: { launcherConfig?: WidgetLauncherConfig | nul
   const launcherConfig = getLauncherConfig(props?.launcherConfig);
   const sessionIdRef = useRef<string | null>(null);
   const [open, setOpen] = useState(false);
-  const [greetingDismissed, setGreetingDismissed] = useState(false);
+  const [showGreeting, setShowGreeting] = useState(true);
   const [started, setStarted] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -153,7 +165,7 @@ export function ChatWidget(props?: { launcherConfig?: WidgetLauncherConfig | nul
 
   return (
     <>
-      {!open && !greetingDismissed && (
+      {!open && showGreeting && (
         <div className="sealx-greeting-bubble" style={{ position: "fixed", right: 20, bottom: 72, zIndex: 9998, maxWidth: "calc(100vw - 40px)" }}>
           <div
             style={{
@@ -169,7 +181,7 @@ export function ChatWidget(props?: { launcherConfig?: WidgetLauncherConfig | nul
           >
             <button
               type="button"
-              onClick={() => setGreetingDismissed(true)}
+              onClick={() => setShowGreeting(false)}
               aria-label="Dismiss"
               style={{
                 position: "absolute",
@@ -205,7 +217,13 @@ export function ChatWidget(props?: { launcherConfig?: WidgetLauncherConfig | nul
 
       <button
         type="button"
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => {
+          setOpen((o) => {
+            const next = !o;
+            if (next) setShowGreeting(false);
+            return next;
+          });
+        }}
         className="sealx-launcher-button"
         style={{
           position: "fixed",
