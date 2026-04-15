@@ -284,7 +284,7 @@ export function ChatWidget(props?: { launcherConfig?: WidgetLauncherConfig | nul
             }}
           >
             <div style={{ fontWeight: 650 }}>Chat</div>
-            <div style={{ fontSize: 12, opacity: 0.6 }}>Prototype</div>
+            <div />
           </div>
 
           {!started ? (
