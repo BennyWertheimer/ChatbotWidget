@@ -37,11 +37,26 @@ function ChatIcon() {
 }
 
 function getLauncherConfig(overrides?: WidgetLauncherConfig | null): Required<WidgetLauncherConfig> {
+  const normalizeText = (value: string | undefined, fallback: string) => {
+    const v = (value ?? "").trim();
+    return v.length > 0 ? v : fallback;
+  };
+
   if (typeof window !== "undefined" && (window as unknown as { __SEALX_CONFIG__?: WidgetLauncherConfig }).__SEALX_CONFIG__) {
     const w = (window as unknown as { __SEALX_CONFIG__: WidgetLauncherConfig }).__SEALX_CONFIG__;
-    return { ...DEFAULT_LAUNCHER_CONFIG, ...w };
+    return {
+      primaryColor: normalizeText(w.primaryColor, DEFAULT_LAUNCHER_CONFIG.primaryColor),
+      launcherText: normalizeText(w.launcherText, DEFAULT_LAUNCHER_CONFIG.launcherText),
+      greetingText: normalizeText(w.greetingText, DEFAULT_LAUNCHER_CONFIG.greetingText),
+      avatarUrl: normalizeText(w.avatarUrl, DEFAULT_LAUNCHER_CONFIG.avatarUrl),
+    };
   }
-  return { ...DEFAULT_LAUNCHER_CONFIG, ...overrides };
+  return {
+    primaryColor: normalizeText(overrides?.primaryColor, DEFAULT_LAUNCHER_CONFIG.primaryColor),
+    launcherText: normalizeText(overrides?.launcherText, DEFAULT_LAUNCHER_CONFIG.launcherText),
+    greetingText: normalizeText(overrides?.greetingText, DEFAULT_LAUNCHER_CONFIG.greetingText),
+    avatarUrl: normalizeText(overrides?.avatarUrl, DEFAULT_LAUNCHER_CONFIG.avatarUrl),
+  };
 }
 
 function validateEmail(email: string): boolean {
@@ -205,6 +220,12 @@ export function ChatWidget(props?: { launcherConfig?: WidgetLauncherConfig | nul
               alt=""
               width={48}
               height={48}
+              onError={(e) => {
+                const img = e.currentTarget;
+                if (img.src !== DEFAULT_LAUNCHER_CONFIG.avatarUrl) {
+                  img.src = DEFAULT_LAUNCHER_CONFIG.avatarUrl;
+                }
+              }}
               style={{ borderRadius: "50%", objectFit: "cover", flexShrink: 0 }}
             />
             <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: "#1a1a1a", lineHeight: 1.3, paddingRight: 20 }}>

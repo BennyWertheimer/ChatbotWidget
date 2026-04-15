@@ -10,9 +10,9 @@
   var avatarUrl = s.getAttribute("data-avatar-url") || "";
   var embedUrl = base + "/embed.html?apiBaseUrl=" + encodeURIComponent(apiUrl) + "&workspace=" + encodeURIComponent(workspace);
   if (themeColor) embedUrl += "&themeColor=" + encodeURIComponent(themeColor);
-  if (launcherText) embedUrl += "&launcherText=" + encodeURIComponent(launcherText);
-  if (greetingText) embedUrl += "&greetingText=" + encodeURIComponent(greetingText);
-  if (avatarUrl) embedUrl += "&avatarUrl=" + encodeURIComponent(avatarUrl);
+  if (launcherText.trim()) embedUrl += "&launcherText=" + encodeURIComponent(launcherText.trim());
+  if (greetingText.trim()) embedUrl += "&greetingText=" + encodeURIComponent(greetingText.trim());
+  if (avatarUrl.trim()) embedUrl += "&avatarUrl=" + encodeURIComponent(avatarUrl.trim());
   var iframe = document.createElement("iframe");
   iframe.src = embedUrl;
   iframe.title = "SealX Chat";
